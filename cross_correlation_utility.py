@@ -2,9 +2,10 @@ import numpy as np
 from moviepy import VideoFileClip
 from scipy import signal
 import cv2
+from typing import Tuple
 
 
-def audio_cross_correlation(full_video_path, clip_path):
+def audio_cross_correlation(full_video_path: str, clip_path: str) -> Tuple[float, float]:
     """
     Use audio cross-correlation to find a clip within a full video.
 
@@ -15,14 +16,15 @@ def audio_cross_correlation(full_video_path, clip_path):
     Returns:
         tuple: (start_time, end_time) in seconds
     """
+    SAMPLING_RATE = 22050
     print("Extracting audio from videos...")
     # Extract audio from both videos
     full_video = VideoFileClip(full_video_path)
     clip_video = VideoFileClip(clip_path)
 
     # Get audio arrays
-    full_audio = full_video.audio.to_soundarray(fps=22050)
-    clip_audio = clip_video.audio.to_soundarray(fps=22050)
+    full_audio = full_video.audio.to_soundarray(fps=SAMPLING_RATE)
+    clip_audio = clip_video.audio.to_soundarray(fps=SAMPLING_RATE)
 
     # Convert to mono if stereo
     if len(full_audio.shape) > 1 and full_audio.shape[1] > 1:
@@ -43,7 +45,7 @@ def audio_cross_correlation(full_video_path, clip_path):
     correlation_strength = correlation[best_offset] / len(clip_audio)
 
     # Convert to time
-    start_time = best_offset / 22050  # Convert samples to seconds
+    start_time = best_offset / SAMPLING_RATE  # Convert samples to seconds
     end_time = start_time + clip_video.duration
 
     return start_time, end_time
